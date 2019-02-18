@@ -18,6 +18,7 @@ const int minThreshold = 50;
 const int maxThreshold = 200;
 const int kernelSize = 3;
 
+
 vector<Mat> stringToMat(vector<string> fileName){
 
     vector<Mat> src;
@@ -61,8 +62,27 @@ vector<string> readImages(string path){
 
 void processOne(Mat src){
 
-    Canny(src, src, minThreshold, maxThreshold, kernelSize);
-    imshow("Edge Map", src);
+    Mat edges, lines, masked;
+    int numberOfpoints = 4;
+    vector<Point2d> points = {
+            Point2d(src.size().height/2,src.size().width/2),
+            Point2d(src.size().height, 0),
+            Point2d(src.size().height,src.size().width),
+            Point2d(src.size().height/2,src.size().width/2)
+        };
+    InputArrayOfArrays vers = InputArrayOfArrays(points);
+
+    // Detect edges
+    cout << "Image size: " << src.size() << endl;
+    Canny(src, edges, minThreshold, maxThreshold, kernelSize);
+    imshow("Edge Map", edges);
+
+    // Select ROI
+    //roi.zeros(src.size(),src.type());
+    src.zeros();
+    fillPoly(src,vers,Scalar(255),8,0);
+    bitwise_and(roi,src,roi);
+    imshow("ROI",roi);
 
     int k = waitKey(0); 
     if(k==27) return;
@@ -74,12 +94,12 @@ bool processImages(vector<string> fileName){
     vector<Mat> src = stringToMat(fileName);
 
     FOR(0,fileName.size()){
-        try{
+        //try{
             processOne(src[i]);
-        }
-        catch(...){
-            return false;
-        }
+        //}
+        //catch(...){
+        //    return false;
+        //}
 
     }
 
