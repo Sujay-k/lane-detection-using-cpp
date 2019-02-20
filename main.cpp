@@ -62,15 +62,19 @@ vector<string> readImages(string path){
 
 void processOne(Mat src){
 
-    Mat edges, lines, masked;
-    int numberOfpoints = 4;
-    vector<Point2d> points = {
-            Point2d(src.size().height/2,src.size().width/2),
-            Point2d(src.size().height, 0),
-            Point2d(src.size().height,src.size().width),
-            Point2d(src.size().height/2,src.size().width/2)
-        };
-    InputArrayOfArrays vers = InputArrayOfArrays(points);
+    Mat edges, lines, masked,roi;
+    int numberOfpoints[] = {8};
+
+    Point points[1][6];
+
+    points[0][0] = Point(src.size().height/2,src.size().width/2);
+    points[0][1] = Point(src.size().height, 0);
+    points[0][2] = Point(src.size().height, 0);
+    points[0][3] = Point(src.size().height,src.size().width);
+    points[0][4] = Point(src.size().height,src.size().width);
+    points[0][5] = Point(src.size().height/2,src.size().width/2);
+
+    const Point* vertices[1] = { points[0] };
 
     // Detect edges
     cout << "Image size: " << src.size() << endl;
@@ -79,9 +83,10 @@ void processOne(Mat src){
 
     // Select ROI
     //roi.zeros(src.size(),src.type());
-    src.zeros();
-    fillPoly(src,vers,Scalar(255),8,0);
-    bitwise_and(roi,src,roi);
+    roi = Mat::zeros(src.size(),src.type());
+    fillPoly(roi, vertices, numberOfpoints, 1, Scalar(255), 8);
+    imshow("ROI_",roi);
+    bitwise_and(src,roi,roi);
     imshow("ROI",roi);
 
     int k = waitKey(0); 
