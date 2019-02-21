@@ -1,2 +1,11 @@
 # lane-detection-using-cpp
-Lane detection using opencv and c++ 
+
+Trying to build a robust and fast lane detection algorithm for all sorts of roads. 
+
+Here are sample outputs on a simple scenes. 
+
+![output1](https://github.com/Sujay-k/lane-detection-using-cpp/sampleOutputs/output1.png)
+
+![output2](https://github.com/Sujay-k/lane-detection-using-cpp/sampleOutputs/output2.png)
+
+![output3](https://github.com/Sujay-k/lane-detection-using-cpp/sampleOutputs/output3.png)

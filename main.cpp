@@ -18,6 +18,12 @@ const int minThreshold = 50;
 const int maxThreshold = 200;
 const int kernelSize = 3;
 
+//houghLines Thresholds
+int rho = 1;
+int theta = CV_PI / 180;
+int Threshold = 40;
+int minLineLength = 100;
+int maxLineGap = 300;
 
 vector<Mat> stringToMat(vector<string> fileName){
 
@@ -62,33 +68,48 @@ vector<string> readImages(string path){
 
 void processOne(Mat src){
 
-    Mat edges, lines, masked,roi;
+    Mat edges,roi;
     int numberOfpoints[] = {8};
+    int shiftx = 46;
+    int shifty = 45;
 
-    Point points[1][6];
+    Point points[1][8];
 
-    points[0][0] = Point(src.size().height/2,src.size().width/2);
-    points[0][1] = Point(src.size().height, 0);
-    points[0][2] = Point(src.size().height, 0);
-    points[0][3] = Point(src.size().height,src.size().width);
-    points[0][4] = Point(src.size().height,src.size().width);
-    points[0][5] = Point(src.size().height/2,src.size().width/2);
+    points[0][0] = Point(src.size().width/2 - shiftx,src.size().height/2 + shifty);
+    points[0][1] = Point(50, src.size().height);
+    points[0][2] = Point(50, src.size().height);
+    points[0][3] = Point(src.size().width - 50,src.size().height);
+    points[0][4] = Point(src.size().width - 50,src.size().height);
+    points[0][5] = Point(src.size().width/2 + shiftx,src.size().height/2 + shifty);
+    points[0][6] = Point(src.size().width/2 + shiftx,src.size().height/2 + shifty);
+    points[0][7] = Point(src.size().width/2 - shiftx,src.size().height/2 + shifty);
 
     const Point* vertices[1] = { points[0] };
 
     // Detect edges
-    cout << "Image size: " << src.size() << endl;
+    //cout << "Image size: " << src.size() << endl;
+    imshow("Input image", src);
     Canny(src, edges, minThreshold, maxThreshold, kernelSize);
-    imshow("Edge Map", edges);
+    //imshow("Edge Map", edges);
 
     // Select ROI
     //roi.zeros(src.size(),src.type());
     roi = Mat::zeros(src.size(),src.type());
     fillPoly(roi, vertices, numberOfpoints, 1, Scalar(255), 8);
-    imshow("ROI_",roi);
-    bitwise_and(src,roi,roi);
-    imshow("ROI",roi);
+    //imshow("ROI_",roi);
+    bitwise_and(edges,roi,roi);
+    //imshow("ROI",roi);
 
+    std::vector<cv::Vec4i> lines;
+    HoughLinesP( roi, lines, 1, CV_PI/360, 40, 120, 280);
+    
+    cvtColor(src, src, COLOR_GRAY2BGR);
+
+    FOR(0,lines.size()){
+        Vec4i l = lines[i];
+        line(src, Point(l[0],l[1]), Point(l[2],l[3]), Scalar(0,0,255), 1, LINE_AA);
+    }
+    imshow("Detected Lane", src);
     int k = waitKey(0); 
     if(k==27) return;
 
@@ -99,12 +120,12 @@ bool processImages(vector<string> fileName){
     vector<Mat> src = stringToMat(fileName);
 
     FOR(0,fileName.size()){
-        //try{
+        try{
             processOne(src[i]);
-        //}
-        //catch(...){
-        //    return false;
-        //}
+        }
+        catch(...){
+            return false;
+        }
 
     }
 
